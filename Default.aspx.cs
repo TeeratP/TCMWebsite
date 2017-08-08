@@ -10,6 +10,7 @@ using System.Web.UI.WebControls;
 using System.IO;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using System.Text.RegularExpressions;
 
 public partial class Default : Page
 {
@@ -35,7 +36,7 @@ public partial class Default : Page
 
     protected async Task Cal_Profit()
     {
-        string[] intCurrencies = { "BTC", "ETH" };
+        string[] intCurrencies = { "BTC"};
 
         await LoadDataAsync();
 
@@ -224,13 +225,8 @@ public partial class Default : Page
             };
     }
 
-    public List<CurrObject> Get_Curreny_list(string[] intCurrencies)
+    public List<CurrObject> Get_Curreny_list(string[] intCurrencies) //<<< Change this to get HR, get input as currencylist
     {
-        //Get all url
-        //HtmlWeb hw = new HtmlWeb();
-        //HtmlDocument doc = hw.Load("https://whattomine.com/calculators");
-
-
         //Create Currency list to keep chosen currency
         List<CurrObject> CurrList = new List<CurrObject>();
 
@@ -460,21 +456,48 @@ public partial class Default : Page
         var polo_task   = get_data("https://poloniex.com/public?command=returnOrderBook&currencyPair=all&depth=1");
         var btrx_task   = get_data("https://bittrex.com/api/v1.1/public/getmarketsummaries");
         var bx_BTC_task = get_data("https://bx.in.th/api/orderbook/?pairing=1");
-        var bx_ETH_task = get_data("https://bx.in.th/api/orderbook/?pairing=21");
         var WTM_task    = get_data("http://whattomine.com/coins.json");
+        
+        HtmlWeb hw = new HtmlWeb();
+        HtmlDocument doc = hw.Load("https://whattomine.com/calculators");
+        foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a[@href]"))
+        {
+            if(Get_Coin_id(link) != "")
+            {
+                
+            }
+        }
 
         string polo_json    = await polo_task;
         string btrx_json    = await btrx_task;
         string bx_BTC_json  = await bx_BTC_task;
-        string bx_ETH_json  = await bx_ETH_task;
         string WTM_json     = await WTM_task;
 
         polo_obj    = JObject.Parse(polo_json);
         btrx_obj    = JObject.Parse(btrx_json);
         bx_BTC_obj  = JObject.Parse(bx_BTC_json);
-        bx_ETH_obj  = JObject.Parse(bx_ETH_json);
         WTM_obj     = JObject.Parse(WTM_json);
 
+    }
+
+    private string Get_Coin_id(HtmlNode link)
+    {
+        Regex regex1 = new Regex(@".*(\/coins\/).*"); //Filter non-coin links
+        Regex regex2 = new Regex(@".*(https).*"); //Filter coin image links
+        Regex regex3 = new Regex(@"\/\d+-"); //Get coin id with context
+        Regex regex4 = new Regex(@"\d+"); //Get coin id
+
+        string coin_id = "";
+
+        if (regex1.Match(link.OuterHtml).Value != "")
+        { //After this step, only Coin and Coin image will pass
+            if (regex2.Match(link.OuterHtml).Value == "")
+            { // Filter out coin image
+                coin_id = regex4.Match(regex3.Match(link.OuterHtml).Value).Value;
+            }
+        }
+
+        return coin_id;
     }
 
     public async Task<string> get_data(string url)
