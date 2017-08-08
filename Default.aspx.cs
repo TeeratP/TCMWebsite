@@ -9,6 +9,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.IO;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
 
 public partial class Default : Page
 {
@@ -225,6 +226,11 @@ public partial class Default : Page
 
     public List<CurrObject> Get_Curreny_list(string[] intCurrencies)
     {
+        //Get all url
+        //HtmlWeb hw = new HtmlWeb();
+        //HtmlDocument doc = hw.Load("https://whattomine.com/calculators");
+
+
         //Create Currency list to keep chosen currency
         List<CurrObject> CurrList = new List<CurrObject>();
 
