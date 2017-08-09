@@ -457,14 +457,24 @@ public partial class Default : Page
         var btrx_task   = get_data("https://bittrex.com/api/v1.1/public/getmarketsummaries");
         var bx_BTC_task = get_data("https://bx.in.th/api/orderbook/?pairing=1");
         var WTM_task    = get_data("http://whattomine.com/coins.json");
-        
+
+        string coin_id = "";
+        int n = 0;
+        string[] coin_name = new string[175];
+
         HtmlWeb hw = new HtmlWeb();
         HtmlDocument doc = hw.Load("https://whattomine.com/calculators");
         foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a[@href]"))
         {
-            if(Get_Coin_id(link) != "")
+            coin_id = Get_Coin_id(link);
+            if (coin_id != "")
             {
-                
+                n++;
+
+                WebClient WebClient = new WebClient();
+                var coin_obj = JObject.Parse(WebClient.DownloadString("https://whattomine.com/coins/" + coin_id + ".json"));
+
+                coin_name[n] = (string)coin_obj["name"];
             }
         }
 
